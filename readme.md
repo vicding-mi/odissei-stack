@@ -24,14 +24,13 @@ It can be run on any remote server as well, i.e for demo purpose, when `HOSTNAME
 properly set. 
 #### Step 1: Start the proxy
 
- `docker-compose-no-ssl.env`
 ```shell
-docker-compose -f docker-compose-no-ssl-proxy.yaml up -d
+docker-compose --env-file .env.dev -f docker-compose-no-ssl-proxy.yaml up -d
 ```
 
 #### Step 2: Start the services
 ```shell
-docker-compose -f docker-compose-no-ssl-services.yaml up -d
+docker-compose --env-file .env.dev -f docker-compose-no-ssl-service.yaml up -d
 ```
 As specified in the `docker-compose-no-ssl.env`, if you visit `http://dev.localhost` on your local machine now, you will 
 see the dataverse instance. 
@@ -39,3 +38,35 @@ see the dataverse instance.
  * `solr.dev.localhost` will take you to the solr page
  * `dbgui.dev.localhost` will take you to the db admin page
  * `dev.localhost:8085` will take you to the demo contact page for CBS
+
+#### Step 3: Edit /etc/hosts
+Add the following entry to `/etc/hosts` to enable routing to localhost
+```shell
+127.0.0.1 dev.localhost
+```
+
+### Building Production (or public test) stack
+To build the public facing services, though not necessarily 'public', one can utilize the following procedure.
+
+#### Step 1: Start the proxy 
+
+```shell
+docker-compose --env-file .env.prod -f docker-compose-ssl-proxy.yaml up -d
+```
+
+#### Step 2: Start the services
+```shell
+docker-compose --env-file .env.prod -f docker-compose-ssl-service.yaml up -d
+```
+As specified in the `.env.prod`, if you visit `https://portal.odissei.nl`, you will see the dataverse instance.
+
+Other available instances:
+
+* `solr.odissei.nl` - solr page
+* `dbgui.odissei.nl` - db admin page
+* `cbs-contact.odissei.nl` - the demo contact page for CBS
+
+Slight modification, change the hostname variable used in all the yaml files, one public demo instance can be 
+easily built. For example, `HOSTNAME=test.odissei.nl` on another VM, test and production stack *cannot* run on the same 
+VM, will start an identical instance on subdomain `test.odissei.nl` all the subdomains should be pointed in DNS 
+accordingly as well. 
