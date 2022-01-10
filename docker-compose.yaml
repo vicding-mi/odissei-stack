@@ -1,0 +1,40 @@
+version: '2'
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: library/postgres:10.13
+    restart: unless-stopped
+    environment:
+      - "LC_ALL"
+      - "POSTGRES_DB=dataverse"
+      - "POSTGRES_USER=dataverse"
+      - "POSTGRES_PASSWORD=changeme"
+      - "POSTGRES_PORT=5432"
+    env_file: .env.dev
+    volumes:
+      - ./data/postgresql_data:/var/lib/postgresql/data
+
+  solr:
+    container_name: solr
+    image: iqss/solr-k8s
+    environment:
+      # log4j patch
+      - "SOLR_OPTS=-Dlog4j2.formatMsgNoLookups=true"
+    volumes:
+      - ./data/solr_data:/opt/solr/server/solr/collection1/data
+
+  dataverse:
+    container_name: dataverse
+    user:
+      "root"
+    build:
+      context: .
+      dockerfile: ./docker/dataverse-k8s/payara/Dockerfile
+    depends_on:
+      - postgresql
+      - solr
+    env_file: .env.dev
+    volumes:
+      - ./data/dataverse_data:/data
+      - ./personas/docker-compose/secrets:/secrets
