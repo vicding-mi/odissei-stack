@@ -11,7 +11,6 @@ services:
       - "POSTGRES_USER=dataverse"
       - "POSTGRES_PASSWORD=changeme"
       - "POSTGRES_PORT=5432"
-    env_file: .env.dev
     volumes:
       - ./data/postgresql_data:/var/lib/postgresql/data
 
@@ -38,7 +37,6 @@ services:
     depends_on:
       - postgresql
       - solr
-    env_file: .env.dev
     volumes:
       - ./data/dataverse_data:/data
       - ./personas/docker-compose/secrets:/secrets
