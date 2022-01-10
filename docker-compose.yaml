@@ -1,4 +1,8 @@
 version: '2'
+networks:
+  dataverse_network:
+    external:
+      name: nginxproxynetwork
 
 services:
   postgresql:
@@ -13,6 +17,8 @@ services:
       - "POSTGRES_PORT=5432"
     volumes:
       - ./data/postgresql_data:/var/lib/postgresql/data
+    networks:
+      - dataverse_network
 
   solr:
     container_name: solr
@@ -22,6 +28,8 @@ services:
       - "SOLR_OPTS=-Dlog4j2.formatMsgNoLookups=true"
     volumes:
       - ./data/solr_data:/opt/solr/server/solr/collection1/data
+    networks:
+      - dataverse_network
 
   dataverse:
     container_name: dataverse
@@ -32,11 +40,13 @@ services:
       dockerfile: ./docker/dataverse-k8s/payara/Dockerfile
     environment:
       - VIRTUAL_HOST=${HOSTNAME}
-    ports:
-      - "80:8080"
     depends_on:
       - postgresql
       - solr
     volumes:
       - ./data/dataverse_data:/data
       - ./personas/docker-compose/secrets:/secrets
+    ports:
+      - "8080:8080"
+    networks:
+      - dataverse_network
